@@ -2,7 +2,7 @@
 
 `side_panel` is a Flutter package that provides a customizable panel widget that can be displayed on the left, right, top, or bottom sides of the screen. It supports animation for showing and hiding panels and can be controlled via a `SidePanelController`.
 
-![example image](https://github.com/msuhal/flutter_side_panel/blob/master/images/example.gif?raw=true)
+![example image](https://github.com/msuhal/flutter_side_panel/blob/main/images/example.gif?raw=true)
 
 ## Features
 
