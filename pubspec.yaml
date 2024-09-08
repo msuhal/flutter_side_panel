@@ -1,0 +1,20 @@
+name: side_panel
+description: Flutter package that provides a customizable panel widget that can be displayed on the left, right, top, or bottom sides of the screen.
+version: 0.0.1
+repository: https://github.com/msuhal/flutter_side_panel
+issue_tracker: https://github.com/msuhal/flutter_side_panel/issues
+
+environment:
+  sdk: '>=2.18.4 <3.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
