@@ -3,6 +3,7 @@
 `side_panel` is a Flutter package that provides a customizable panel widget that can be displayed on the left, right, top, or bottom sides of the screen. It supports animation for showing and hiding panels and can be controlled via a `SidePanelController`.
 
 ![example image](https://github.com/msuhal/flutter_side_panel/blob/main/images/example.gif?raw=true)
+[Live Demo](https://msuhal.github.io/flutter_side_panel)
 
 ## Features
 
@@ -55,7 +56,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final SidePanelController _controller = SidePanelController();
+  final _controller = SidePanelController();
+  var _isOverlay = false;
+
+  // Visibility states of the panels
+  bool _isRightPanelVisible = false;
+  bool _isLeftPanelVisible = false;
+  bool _isTopPanelVisible = false;
+  bool _isBottomPanelVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SidePanel(
         controller: _controller,
         right: Panel(
+          overlay: _isOverlay,
           child: Container(
             color: Colors.blueGrey.shade100,
             child: const Center(
@@ -71,6 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         left: Panel(
+          overlay: _isOverlay,
           child: Container(
             color: Colors.pink.shade100,
             child: const Center(
@@ -79,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         top: Panel(
+          overlay: _isOverlay,
           child: Container(
             color: Colors.orange.shade100,
             child: const Center(
@@ -87,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         bottom: Panel(
+          overlay: _isOverlay,
           child: Container(
             color: Colors.blue.shade100,
             child: const Center(
@@ -100,60 +112,108 @@ class _MyHomePageState extends State<MyHomePage> {
             child: ListView(
               shrinkWrap: true,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    _controller.showRightPanel();
+                CheckboxListTile(
+                  title: const Text('Overlay'),
+                  value: _isOverlay,
+                  onChanged: (value) {
+                    setState(() {
+                      _isRightPanelVisible = false;
+                      _isLeftPanelVisible = false;
+                      _isTopPanelVisible = false;
+                      _isBottomPanelVisible = false;
+                      _controller.hideRightPanel();
+                      _controller.hideLeftPanel();
+                      _controller.hideBottomPanel();
+                      _controller.hideTopPanel();
+                      _isOverlay = value!;
+                    });
                   },
-                  child: const Text('Show Right Panel'),
                 ),
                 const SizedBox(height: 12),
+
+                // Toggle button for the right panel
                 ElevatedButton(
                   onPressed: () {
-                    _controller.hideRightPanel();
+                    if (_isOverlay) {
+                      _controller.showRightPanel();
+                      return;
+                    }
+
+                    setState(() {
+                      _isRightPanelVisible = !_isRightPanelVisible;
+                      _isRightPanelVisible
+                          ? _controller.showRightPanel()
+                          : _controller.hideRightPanel();
+                    });
                   },
-                  child: const Text('Hide Right Panel'),
+                  child: Text(_isRightPanelVisible
+                      ? 'Hide Right Panel'
+                      : 'Show Right Panel'),
                 ),
+
                 const SizedBox(height: 24),
+
+                // Toggle button for the left panel
                 ElevatedButton(
                   onPressed: () {
-                    _controller.showLeftPanel();
+                    if (_isOverlay) {
+                      _controller.showLeftPanel();
+                      return;
+                    }
+
+                    setState(() {
+                      _isLeftPanelVisible = !_isLeftPanelVisible;
+                      _isLeftPanelVisible
+                          ? _controller.showLeftPanel()
+                          : _controller.hideLeftPanel();
+                    });
                   },
-                  child: const Text('Show Left Panel'),
+                  child: Text(_isLeftPanelVisible
+                      ? 'Hide Left Panel'
+                      : 'Show Left Panel'),
                 ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () {
-                    _controller.hideLeftPanel();
-                  },
-                  child: const Text('Hide Left Panel'),
-                ),
+
                 const SizedBox(height: 24),
+
+                // Toggle button for the top panel
                 ElevatedButton(
                   onPressed: () {
-                    _controller.showTopPanel();
+                    if (_isOverlay) {
+                      _controller.showTopPanel();
+                      return;
+                    }
+
+                    setState(() {
+                      _isTopPanelVisible = !_isTopPanelVisible;
+                      _isTopPanelVisible
+                          ? _controller.showTopPanel()
+                          : _controller.hideTopPanel();
+                    });
                   },
-                  child: const Text('Show Top Panel'),
+                  child: Text(
+                      _isTopPanelVisible ? 'Hide Top Panel' : 'Show Top Panel'),
                 ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () {
-                    _controller.hideTopPanel();
-                  },
-                  child: const Text('Hide Top Panel'),
-                ),
+
                 const SizedBox(height: 24),
+
+                // Toggle button for the bottom panel
                 ElevatedButton(
                   onPressed: () {
-                    _controller.showBottomPanel();
+                    if (_isOverlay) {
+                      _controller.showBottomPanel();
+                      return;
+                    }
+
+                    setState(() {
+                      _isBottomPanelVisible = !_isBottomPanelVisible;
+                      _isBottomPanelVisible
+                          ? _controller.showBottomPanel()
+                          : _controller.hideBottomPanel();
+                    });
                   },
-                  child: const Text('Show Bottom Panel'),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () {
-                    _controller.hideBottomPanel();
-                  },
-                  child: const Text('Hide Bottom Panel'),
+                  child: Text(_isBottomPanelVisible
+                      ? 'Hide Bottom Panel'
+                      : 'Show Bottom Panel'),
                 ),
               ],
             ),
@@ -164,8 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 ```
-
-This example creates a `SidePanel` with a main content area and a right panel. Clicking the button shows the right panel with its content.
+This Flutter app demonstrates the usage of the `SidePanel` widget with customizable panels on all four sides of the screen. The app includes a `SidePanelController` to programmatically control the visibility of panels on the right, left, top, and bottom. Users can toggle between normal and overlay modes, where the panels either push or float over the main content. The app provides buttons to show or hide each panel, and visibility states are managed within the `State` class. The panels are styled with different background colors to distinguish their positions.
 
 ### SidePanelController
 The `SidePanelController` allows you to programmatically control the visibility of the panels. You can create a controller and assign its methods to functions that trigger panel visibility changes.

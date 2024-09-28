@@ -1,5 +1,7 @@
 library side_panel;
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 /// A controller for the [SidePanel].
@@ -75,12 +77,30 @@ class Panel {
   /// content of the panel.
   final Widget child;
 
-  /// Creates a new [Panel].
+  /// Whether the panel should be displayed as an overlay.
   ///
-  /// The [size] parameter is optional and defaults to 300. The [child]
-  /// parameter is required and must not be null.
+  /// When [overlay] is true, the panel is displayed as an overlay over the
+  /// screen. When it is false, the panel is displayed as a normal widget.
+  ///
+  /// The default value is false.
+  final bool overlay;
+
+  /// Create a new [Panel] with the given [size], [child], and [overlay].
+  ///
+  /// The [size] parameter is the width of the panel when it is positioned on the
+  /// left or right side of the screen, and the height of the panel when it is
+  /// positioned on the top or bottom side of the screen. The default value is 300.
+  ///
+  /// The [child] parameter is the widget that is displayed in the panel and is
+  /// used to provide the content of the panel.
+  ///
+  /// The [overlay] parameter determines whether the panel should be displayed as
+  /// an overlay over the screen. When it is true, the panel is displayed as an
+  /// overlay over the screen. When it is false, the panel is displayed as a normal
+  /// widget. The default value is false.
   Panel({
     this.size = 300,
+    this.overlay = false,
     required this.child,
   });
 }
@@ -199,9 +219,13 @@ class SidePanelState extends State<SidePanel> {
 
   void _showRightPanel() {
     if (widget.right == null) return;
-    setState(() {
-      _isShowRightPanel = true;
-    });
+    if (widget.right!.overlay) {
+      Navigator.of(context).push(_showOverlay(right: widget.right!));
+    } else {
+      setState(() {
+        _isShowRightPanel = true;
+      });
+    }
   }
 
   void _hideRightPanel() {
@@ -213,9 +237,13 @@ class SidePanelState extends State<SidePanel> {
 
   void _showLeftPanel() {
     if (widget.left == null) return;
-    setState(() {
-      _isShowLeftPanel = true;
-    });
+    if (widget.left!.overlay) {
+      Navigator.of(context).push(_showOverlay(left: widget.left!));
+    } else {
+      setState(() {
+        _isShowLeftPanel = true;
+      });
+    }
   }
 
   void _hideLeftPanel() {
@@ -227,9 +255,13 @@ class SidePanelState extends State<SidePanel> {
 
   void _showTopPanel() {
     if (widget.top == null) return;
-    setState(() {
-      _isShowTopPanel = true;
-    });
+    if (widget.top!.overlay) {
+      Navigator.of(context).push(_showOverlay(top: widget.top!));
+    } else {
+      setState(() {
+        _isShowTopPanel = true;
+      });
+    }
   }
 
   void _hideTopPanel() {
@@ -241,9 +273,13 @@ class SidePanelState extends State<SidePanel> {
 
   void _showBottomPanel() {
     if (widget.bottom == null) return;
-    setState(() {
-      _isShowBottomPanel = true;
-    });
+    if (widget.bottom!.overlay) {
+      Navigator.of(context).push(_showOverlay(bottom: widget.bottom!));
+    } else {
+      setState(() {
+        _isShowBottomPanel = true;
+      });
+    }
   }
 
   void _hideBottomPanel() {
@@ -253,6 +289,59 @@ class SidePanelState extends State<SidePanel> {
     });
   }
 
+  Route _showOverlay({
+    Panel? left,
+    Panel? right,
+    Panel? top,
+    Panel? bottom,
+  }) {
+    assert(left != null || right != null || top != null || bottom != null);
+    late Widget child;
+    late Offset begin;
+    late Alignment alignment;
+
+    if (left != null) {
+      child = SizedBox(width: left.size, child: left.child);
+      begin = const Offset(-1.0, 0.0);
+      alignment = Alignment.centerLeft;
+    } else if (right != null) {
+      child = SizedBox(width: right.size, child: right.child);
+      begin = const Offset(1.0, 0.0);
+      alignment = Alignment.centerRight;
+    } else if (top != null) {
+      child = SizedBox(height: top.size, child: top.child);
+      begin = const Offset(0.0, -1.0);
+      alignment = Alignment.topCenter;
+    } else if (bottom != null) {
+      child = SizedBox(height: bottom.size, child: bottom.child);
+      begin = const Offset(0.0, 1.0);
+      alignment = Alignment.bottomCenter;
+    }
+
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => child,
+      transitionDuration: const Duration(milliseconds: 300),
+      reverseTransitionDuration: const Duration(milliseconds: 300),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween<Offset>(
+          begin: begin,
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.easeInOut));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: Align(
+            alignment: alignment,
+            child: Material(child: child),
+          ),
+        );
+      },
+      opaque: false,
+      barrierDismissible: true,
+      barrierColor: const Color.fromRGBO(100, 100, 100, 0.5),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -260,16 +349,24 @@ class SidePanelState extends State<SidePanel> {
         Positioned.fill(
           child: AnimatedContainer(
             margin: EdgeInsets.only(
-              right: _isShowRightPanel ? widget.right!.size : 0,
-              left: _isShowLeftPanel ? widget.left!.size : 0,
-              top: _isShowTopPanel ? widget.top!.size : 0,
-              bottom: _isShowBottomPanel ? widget.bottom!.size : 0,
+              right: _isShowRightPanel && widget.right?.overlay != true
+                  ? widget.right!.size
+                  : 0,
+              left: _isShowLeftPanel && widget.left?.overlay != true
+                  ? widget.left!.size
+                  : 0,
+              top: _isShowTopPanel && widget.top?.overlay != true
+                  ? widget.top!.size
+                  : 0,
+              bottom: _isShowBottomPanel && widget.bottom?.overlay != true
+                  ? widget.bottom!.size
+                  : 0,
             ),
             duration: widget.animatedDuration,
             child: widget.child,
           ),
         ),
-        if (widget.right != null)
+        if (widget.right != null && !widget.right!.overlay)
           AnimatedPositioned(
             top: 0,
             bottom: 0,
@@ -280,7 +377,7 @@ class SidePanelState extends State<SidePanel> {
               child: widget.right!.child,
             ),
           ),
-        if (widget.left != null)
+        if (widget.left != null && !widget.left!.overlay)
           AnimatedPositioned(
             top: 0,
             bottom: 0,
@@ -291,7 +388,7 @@ class SidePanelState extends State<SidePanel> {
               child: widget.left!.child,
             ),
           ),
-        if (widget.top != null)
+        if (widget.top != null && !widget.top!.overlay)
           AnimatedPositioned(
             left: 0,
             right: 0,
@@ -302,7 +399,7 @@ class SidePanelState extends State<SidePanel> {
               child: widget.top!.child,
             ),
           ),
-        if (widget.bottom != null)
+        if (widget.bottom != null && !widget.bottom!.overlay)
           AnimatedPositioned(
             left: 0,
             right: 0,
